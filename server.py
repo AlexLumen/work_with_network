@@ -16,12 +16,20 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data = conn.recv(1024)
         data = data.decode("utf-8").strip()
         print(data)
-        if 'status=404' in data:
-            conn.send(f"Request Method: GET\nRequest Source: ({HOST},{PORT})"
-                        f"\nResponse Status: {HTTPStatus.NOT_FOUND}  Not found"
-                        f"\n{data[4:]} ".encode("utf-8"))
-        else:
-            conn.send(f"Request Method: GET\nRequest Source: ({HOST},{PORT})"
-                      f"\nResponse Status: {HTTPStatus.OK} OK"
-                      f"\n{data[4:]}".encode("utf-8"))
 
+        for status in HTTPStatus:
+            if f"status={status.value}" in data.split()[1]:
+                status_value = status.value
+                status_phrase = status.phrase
+                break
+            else:
+                status_value = HTTPStatus.OK
+                status_phrase = HTTPStatus(HTTPStatus.OK).phrase
+
+        data = data.split()
+        conn.send(f"{data[2]} {status.value} {status.phrase}"
+                  f"\nContent-Type: text/html; charset=utf-8\n"
+                  f"\nRequest Method: {data[0]}"
+                  f"\nRequest Source: ({HOST},{PORT})"
+                  f"\nResponse Status: {status.value} {status.phrase}"
+                  f"\n{data[4:]}".encode("utf-8"))
