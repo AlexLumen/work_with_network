@@ -16,7 +16,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data = conn.recv(1024)
         data = data.decode("utf-8").strip()
         print(data)
-
         for status in HTTPStatus:
             if f"status={status.value}" in data.split()[1]:
                 status_value = status.value
@@ -25,11 +24,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             else:
                 status_value = HTTPStatus.OK
                 status_phrase = HTTPStatus(HTTPStatus.OK).phrase
-
-        data = data.split()
-        conn.send(f"{data[2]} {status.value} {status.phrase}"
+        conn.send(f"{data.split()[2]} {status.value} {status_phrase}"
                   f"\nContent-Type: text/html; charset=utf-8\n"
-                  f"\nRequest Method: {data[0]}"
+                  f"\nRequest Method: {data.split()[0]}"
                   f"\nRequest Source: ({HOST},{PORT})"
-                  f"\nResponse Status: {status.value} {status.phrase}"
+                  f"\nResponse Status: {status_value} {status_phrase}"
                   f"\n{data[4:]}".encode("utf-8"))
